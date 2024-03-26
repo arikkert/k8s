@@ -1,0 +1,12 @@
+---
+- name: Ensure k8s03 cluster workers are added to k8s03 cluster
+  hosts: k8s01workers k8s02workers k8s03workers
+  become: true
+
+  tasks:
+
+    - name: Ensure package to enable pods on workers to be NFS client is installed
+      ansible.builtin.package:
+        name: nfs-common
+
+...

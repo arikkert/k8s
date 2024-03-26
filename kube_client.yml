@@ -1,0 +1,91 @@
+---
+- name: Ensure controller is configured as client
+  hosts: k8s01control k8s02control k8s03control
+  become: true
+
+  tasks:
+
+    - name: Ensure pre-req for become_user is installed
+      ansible.builtin.package:
+        name: acl
+      check_mode: false
+
+    - name: Ensure k8s control node is configured as client
+      become_user: "{{ k8s_user }}"
+      ansible.builtin.script: k8s_user/kube_client.sh
+      args:
+        creates: /home/{{ k8s_user }}/.kube/config
+
+    - name: Test if client is configured
+      become_user: "{{ k8s_user }}"
+      ansible.builtin.command: kubectl get nodes
+      register: result
+      changed_when: false
+
+    - name: Show test result
+      ansible.builtin.debug:
+        var: result.stdout_lines
+
+    - name: Fetch admin.conf from control nodes (to be later copied to workers)
+      ansible.builtin.fetch:
+        src: /etc/kubernetes/admin.conf
+        dest: /var/tmp/admin.conf.{{ ansible_hostname }}
+        flat: true
+        check_mode: false # Seems a bug : in check_mode it will skip the task, where it should run
+
+- name: Ensure for k8s01 cluster the controller admin.conf is copied to workers
+  hosts: k8s01workers
+  become: true
+  tasks:
+    - name: Ensure admin.conf is available on worker node
+      ansible.builtin.copy:
+        src: /var/tmp/admin.conf.k8s01control
+        dest: /var/tmp/admin.conf
+        mode: "0644"
+
+- name: Ensure for k8s02 cluster the controller admin.conf is copied to workers
+  hosts: k8s02workers
+  become: true
+  tasks:
+    - name: Ensure admin.conf is available on worker node
+      ansible.builtin.copy:
+        src: /var/tmp/admin.conf.k8s02control
+        dest: /var/tmp/admin.conf
+        mode: "0644"
+
+- name: Ensure for k8s03 cluster the controller admin.conf is copied to workers
+  hosts: k8s03workers
+  become: true
+  tasks:
+    - name: Ensure admin.conf is available on worker node
+      ansible.builtin.copy:
+        src: /var/tmp/admin.conf.k8s03control
+        dest: /var/tmp/admin.conf
+        mode: "0644"
+
+- name: Ensure k8s workers are configured for all clusters
+  hosts: k8s01workers k8s02workers k8s03workers
+  become: true
+  tasks:
+
+    - name: Ensure pre-req for become_user is installed
+      ansible.builtin.package:
+        name: acl
+      check_mode: false
+
+    - name: Ensure k8s workers are configured as client
+      become_user: "{{ k8s_user }}"
+      ansible.builtin.script: k8s_user/kube_client.sh
+      args:
+        creates: /home/{{ k8s_user }}/.kube/config
+
+    - name: Test if client is configured
+      become_user: "{{ k8s_user }}"
+      ansible.builtin.command: kubectl get nodes
+      register: result
+      changed_when: false
+
+    - name: Show test result
+      ansible.builtin.debug:
+        var: result.stdout_lines
+...

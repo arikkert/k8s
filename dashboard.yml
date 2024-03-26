@@ -1,0 +1,24 @@
+---
+- name: Ensure dashboard scripts are installed
+  hosts: k8s01control k8s02control k8s03control
+  become: true
+
+  tasks:
+    - name: Directory
+      become_user: "{{ k8s_user }}"
+      ansible.builtin.file:
+        path: ~/dashboard
+        state: directory
+        mode: "0755"
+
+    - name: Ensure scripts are present
+      become_user: "{{ k8s_user }}"
+      ansible.builtin.copy:
+        src: "k8s_user/dashboard/{{ item }}"
+        dest: ~/dashboard/
+        mode: "0644"
+      loop:
+        - components.yaml
+        - dashboard-admin-bind-cluster-role.yaml
+        - dashboard-admin.yaml
+        - recommended.yaml

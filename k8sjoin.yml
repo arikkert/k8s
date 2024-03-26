@@ -1,0 +1,91 @@
+---
+- name: Ensure k8s join token from controllers are saved per cluster, to add workers later
+  hosts: k8s01control k8s02control k8s03control
+  become: true
+
+  tasks:
+
+    - name: Ensure join token is created
+      ansible.builtin.command: kubeadm token create --print-join-command
+      register: result
+      changed_when: false
+      check_mode: false
+
+    - name: Debug
+      ansible.builtin.debug:
+        var: result.stdout
+
+- name: Ensure k8s01 cluster workers are added to k8s01 cluster
+  hosts: k8s01workers
+  become: true
+
+  tasks:
+
+    - name: Debug
+      ansible.builtin.debug:
+        var: hostvars['k8s01control.{{ domain }}']['result'].stdout
+
+    - name: Ensure cluster nodes are known, then they are joined
+      become_user: "{{ k8s_user }}"
+      ansible.builtin.command: kubectl get nodes
+      register: result
+      changed_when: false
+
+    - name: Debug hier
+      ansible.builtin.debug:
+        var: result.stdout_lines
+
+    # special syntax to avoid nested curly braces using the variable domain
+    - name: Join when not already joined
+      ansible.builtin.command: "{{ hostvars['k8s01control.' ~ domain]['result'].stdout }}"
+      when: ansible_hostname not in result.stdout
+
+- name: Ensure k8s02 cluster workers are added to k8s02 cluster
+  hosts: k8s02workers
+  become: true
+
+  tasks:
+
+    - name: Debug
+      ansible.builtin.debug:
+        var: hostvars['k8s02control.{{ domain }}']['result'].stdout
+
+    - name: Ensure cluster nodes are known, then they are joined
+      become_user: "{{ k8s_user }}"
+      ansible.builtin.command: kubectl get nodes
+      register: result
+      changed_when: false
+
+    - name: Debug
+      ansible.builtin.debug:
+        var: result.stdout_lines
+
+    - name: Join when not already joined
+      ansible.builtin.command: "{{ hostvars['k8s02control.' ~ domain]['result'].stdout }}"
+      when: ansible_hostname not in result.stdout
+
+- name: Ensure k8s03 cluster workers are added to k8s03 cluster
+  hosts: k8s03workers
+  become: true
+
+  tasks:
+
+    - name: Debug
+      ansible.builtin.debug:
+        var: hostvars['k8s03control.{{ domain }}']['result'].stdout
+
+    - name: Ensure cluster nodes are known, then they are joined
+      become_user: "{{ k8s_user }}"
+      ansible.builtin.command: kubectl get nodes
+      register: result
+      changed_when: false
+
+    - name: Debug
+      ansible.builtin.debug:
+        var: result.stdout_lines
+
+    - name: Join when not already joined
+      ansible.builtin.command: "{{ hostvars['k8s03control.' ~ domain]['result'].stdout }}"
+      when: ansible_hostname not in result.stdout
+
+...

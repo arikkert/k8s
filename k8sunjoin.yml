@@ -1,0 +1,40 @@
+---
+- name: Ensure k8s01 workers are unjoined
+  hosts: k8s01workers
+  become: true
+
+  tasks:
+
+    - name: Unjoin node {{ ansible_hostname }} from k8s03
+      become_user: "{{ k8s_user }}"
+      ansible.builtin.command: kubectl delete node {{ ansible_hostname }}
+
+    - name: Reset without confirmation
+      ansible.builtin.command: kubeadm reset --force
+
+- name: Ensure k8s02 workers are unjoined
+  hosts: k8s02workers
+  become: true
+
+  tasks:
+
+    - name: Unjoin node {{ ansible_hostname }} from k8s03
+      become_user: "{{ k8s_user }}"
+      ansible.builtin.command: kubectl delete node {{ ansible_hostname }}
+
+    - name: Reset without confirmation
+      ansible.builtin.command: kubeadm reset --force
+
+- name: Ensure k8s03 workers are unjoined
+  hosts: k8s03workers
+  become: true
+
+  tasks:
+
+    - name: Unjoin node {{ ansible_hostname }} from k8s03
+      become_user: "{{ k8s_user }}"
+      ansible.builtin.command: kubectl delete node {{ ansible_hostname }}
+
+    - name: Reset without confirmation
+      ansible.builtin.command: kubeadm reset --force
+...

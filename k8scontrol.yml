@@ -1,0 +1,53 @@
+---
+- name: Ensure k8s cluster is setup
+  hosts: k8s01control k8s02control k8s03control
+  become: true
+
+  tasks:
+    - name: Init
+      ansible.builtin.command: kubeadm init
+      args:
+        creates: /etc/kubernetes/admin.conf
+      register: result
+
+    - name: Debug
+      ansible.builtin.debug:
+        var: result.stdout
+
+    - name: Ensure output is saved
+      ansible.builtin.copy:
+        content: "{{ result.stdout }}"
+        dest: /home/kube/kubeadm_init.log
+        mode: "0644"
+      when: "'join' in result.stdout"
+
+    - name: Ensure controle node is configured as client
+      become_user: "{{ k8s_user }}"
+      ansible.builtin.script: k8s_user/kube_client.sh
+      args:
+        creates: /home/kube/.kube
+
+    - name: Check if succeeded
+      ansible.builtin.command: kubectl get all
+      become_user: "{{ k8s_user }}"
+      register: result
+      changed_when: false
+
+    - name: Debug
+      ansible.builtin.debug:
+        var: result.stdout
+
+    - name: Check if network is already configured
+      become_user: "{{ k8s_user }}"
+      ansible.builtin.shell: kubectl get pods -n kube-system | grep -w calico
+      register: result
+      changed_when: false
+      failed_when: false
+      check_mode: false
+
+    - name: Configure Network
+      ansible.builtin.command: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+      become_user: "{{ k8s_user }}"
+      when: result.rc != 0
+
+...

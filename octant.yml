@@ -1,0 +1,35 @@
+---
+- name: Ensure octant is configured
+  hosts: k8s01control k8s02control k8s03control
+  become: true
+
+  tasks:
+
+    - name: Ensure octant deb package is installed
+      ansible.builtin.apt:
+        deb: https://github.com/vmware-archive/octant/releases/download/v0.25.1/octant_0.25.1_Linux-64bit.deb
+    - name: Ensure system start file is present, custom created running under user [{{ k8s_user }}]
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: /etc/systemd/system/
+        mode: '0644'
+      loop:
+        - octant.service
+      notify: Reload daemon
+    - name: Ensure octant is running
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+      loop:
+        - octant.service
+    - name: Show URL to access the
+      ansible.builtin.debug:
+        msg:
+          - URL is http://{{ ansible_host }}:7777
+
+  handlers:
+    - name: Reload daemon
+      ansible.builtin.systemd:
+        daemon_reload: true
+...

@@ -1,0 +1,189 @@
+---
+- name: Ensure k8s clusters are setup
+  hosts: k8s01 k8s02 k8s03
+  become: true
+  tasks:
+
+    - name: PreReq
+      ansible.builtin.apt:
+        name:
+          - git
+          - vim
+
+    - name: Add unprivileged user
+      ansible.builtin.user:
+        name: "{{ k8s_user }}"
+        create_home: true
+        shell: /usr/bin/bash
+    - name: Ensure user kube has elevated privileges
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: /etc/sudoers.d/
+        mode: '0440'
+        validate: visudo -cf %s
+      loop:
+        - "{{ k8s_user }}"
+
+    - name: Ensure pre-req for become_user is installed
+      ansible.builtin.package:
+        name: acl
+      check_mode: false
+
+    - name: Ensure original /home/ansible/.bashrc is saved
+      become: false
+      ansible.builtin.command: "cp -p {{ item }} {{ item }}.bak"
+      args:
+        creates: "{{ item }}.bak"
+      loop:
+        - .bashrc
+        - .profile
+    - name: Ensure alias to quickly login to k8s_user is present
+      become: false
+      ansible.builtin.lineinfile:
+        path: "{{ item }}"
+        line: "alias k='sudo su - {{ k8s_user }}'"
+        backup: true
+      loop:
+        - .bashrc
+        - .profile
+
+    - name: Ensure apt is updated and packages are installed
+      ansible.builtin.apt:
+        name:
+          - containerd
+        update_cache: true
+
+    # containerd
+    - name: Ensure containerd runtime prereq is installed
+      ansible.builtin.copy:
+        src: containerd.conf
+        dest: /etc/modules-load.d/
+        mode: "0644"
+      notify: Modprobe
+
+    - name: Setup required sysctl params, these persist across reboots.
+      ansible.builtin.copy:
+        src: 99-kubernetes-cri.conf
+        dest: /etc/sysctl.d/
+        mode: "0644"
+      notify: Sysctl
+
+    - name: Ensure /etc/containerd exist
+      ansible.builtin.file:
+        path: /etc/containerd
+        state: directory
+        mode: "0755"
+
+    - name: Create default config containerd
+      ansible.builtin.shell: containerd config default > /etc/containerd/config.toml
+      args:
+        creates: /etc/containerd/config.toml
+
+    - name: Patch default config containerd
+      ansible.builtin.lineinfile:
+        dest: /etc/containerd/config.toml
+        regexp: "^disabled_plugins = \\[\\]"
+        line: "# disabled_plugins = []"
+        backup: true
+
+    - name: Install pkgs
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - apt-transport-https
+
+    - name: Ensure swap disabling is checked
+      ansible.builtin.command: swapon -s
+      register: result
+      changed_when: false
+      check_mode: false
+
+    - name: Ensure swap is disabled now
+      ansible.builtin.command: swapoff -a
+      when: "'Filename' in result.stdout"
+
+    - name: Ensure swap is disabled permanently
+      ansible.builtin.replace:
+        path: /etc/fstab
+        regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
+        replace: '# \1'
+        backup: true
+
+    # kube tools
+
+    - name: Ensure keyring is installed
+      ansible.builtin.shell: curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | sudo gpg --dearmor > /etc/apt/keyrings/kubernetes-apt-keyring.gpg # noqa: command-instead-of-module
+      args:
+        creates: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+    - name: Ensure kubernetes repo is installed
+      ansible.builtin.copy:
+        src: kubernetes.list
+        dest: /etc/apt/sources.list.d/
+        mode: "0644"
+
+    - name: Ensure apt is updated and packages are installed
+      ansible.builtin.apt:
+        name:
+          - kubelet
+          - kubeadm
+          - kubectl
+        update_cache: true
+
+    - name: Ensure kubelet is configured
+      ansible.builtin.copy:
+        src: kubelet
+        dest: /etc/default/
+        mode: "0644"
+
+    - name: Extra
+      ansible.builtin.apt:
+        name:
+          - yamllint
+
+    - name: Kube linter
+      tags: linter
+      when: false
+      block:
+
+        # https://docs.wakemeops.com/packages/kube-linter/
+        # hmm, deze code is niet zo mooi en kan indempotenter
+
+        - name: Ensure kube-linter install repo script is downloaded
+          ansible.builtin.get_url:
+            url: https://raw.githubusercontent.com/upciti/wakemeops/main/assets/install_repository
+            dest: /var/tmp/
+            mode: '0755'
+
+        - name: Ensure install repo script is run, so kube-linter can be installed
+          ansible.builtin.command: /var/tmp/install_repository
+
+        - name: Ensure kube-linter is installed
+          ansible.builtin.apt:
+            name: kube-linter
+
+        - name: Ensure its removed now (so it wont interfere with other repos)
+          ansible.builtin.file:
+            path: /etc/apt/sources.list.d/wakemeops.list
+            state: absent
+
+        - name: Ensure main configuration file is installed
+          ansible.builtin.copy:
+            src: kube-linter.yml
+            dest: /etc/default/
+            mode: '0644'
+
+  handlers:
+    - name: Modprobe
+      ansible.builtin.command: "{{ item }}"
+      loop:
+        - modprobe overlay
+        - modprobe br_netfilter
+
+    - name: Sysctl
+      ansible.builtin.command: sysctl --system
+
+...

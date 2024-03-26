@@ -1,0 +1,66 @@
+---
+- name: Ensure k8s control VM is checked
+  hosts: k8s01control k8s02control k8s03control
+  become: true
+
+  tasks:
+
+    - name: Debug
+      ansible.builtin.debug:
+        msg:
+          - "ansible_distribution: {{ _ansible_distribution }}"
+          - "ansible_distribution_major_version: {{ _ansible_distribution_major_version }}"
+
+    - name: Assert target OS
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == _ansible_distribution
+          - ansible_distribution_major_version | int == _ansible_distribution_major_version
+        fail_msg: "Playbook only suitable for OS family {{ _ansible_distribution }} major version {{ _ansible_distribution_major_version }}"
+        success_msg: "Yes, OS is fine"
+
+    - name: Debug
+      ansible.builtin.debug:
+        msg:
+          - "ansible_processor_vcpus: {{ ansible_processor_vcpus }}"
+          - "ansible_memtotal_mb: {{ ansible_memtotal_mb }}"
+
+    - name: Assert
+      ansible.builtin.assert:
+        that:
+          - ansible_processor_vcpus | int >= 4
+          - ansible_memtotal_mb | int >= 7000
+
+- name: Ensure k8s worker VMs are checked
+  hosts: k8s01workers k8s02workers k8s03workers
+  become: true
+
+  tasks:
+
+    - name: Debug
+      ansible.builtin.debug:
+        msg:
+          - "ansible_distribution: {{ _ansible_distribution }}"
+          - "ansible_distribution_major_version: {{ _ansible_distribution_major_version }}"
+
+    - name: Assert target OS
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution ==  _ansible_distribution
+          - ansible_distribution_major_version | int == _ansible_distribution_major_version
+        fail_msg: "Playbook only suitable for OS family {{ _ansible_distribution }} major version {{ _ansible_distribution_major_version }}"
+        success_msg: "Yes, OS is fine"
+
+    - name: Debug
+      ansible.builtin.debug:
+        msg:
+          - "ansible_processor_vcpus: {{ ansible_processor_vcpus }}"
+          - "ansible_memtotal_mb: {{ ansible_memtotal_mb }}"
+
+    - name: Assert
+      ansible.builtin.assert:
+        that:
+          - ansible_processor_vcpus | int >= 2
+          - ansible_memtotal_mb | int >= 3000
+
+...
