@@ -81,8 +81,10 @@ Testing
 -------
 
 Run:
+
     cd test
     make
+
 to test the 3 clusters
 
 Dependencies
