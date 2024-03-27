@@ -5,8 +5,8 @@ Playbooks to deploy 3 k8s clusters on *Ubuntu 22.04 LTS* hosts
 
 It will:
 - check if the hosts fullfill the prereq
-- configure the controllers and join the workers to the clusters
-- install a user **kube** to administer the cluster
+- configure the k8s controllers and join the k8s workers to the clusters
+- install a user *kube* to administer the cluster
 - install helm
 - prepare scripts for k8s dashboard
 - configure octant
@@ -17,7 +17,7 @@ Info
 
 This implementation uses a Makefile as installation wrapper.  
 Just type **make** in the directory where the Makefile is located, to install all dependencies and run the playbook.
-The makefile calls tools like **yamllint* and **ansible-lint**.
+The makefile calls tools like **yamllint** and **ansible-lint**.
 These tools are only called when found in the search path, so no problem if they are not installed.
 
 Requirements
