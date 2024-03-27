@@ -22,3 +22,4 @@
         - dashboard-admin-bind-cluster-role.yaml
         - dashboard-admin.yaml
         - recommended.yaml
+...

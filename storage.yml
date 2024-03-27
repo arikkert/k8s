@@ -1,5 +1,5 @@
 ---
-- name: Ensure k8s03 cluster workers are added to k8s03 cluster
+- name: Ensure k8s cluster workers can run pods that use NFS data
   hosts: k8s01workers k8s02workers k8s03workers
   become: true
 

@@ -1,5 +1,5 @@
 ---
-- name: Ensure controller is configured as client
+- name: Ensure controller is configured as k8s client
   hosts: k8s01control k8s02control k8s03control
   become: true
 
@@ -63,7 +63,7 @@
         dest: /var/tmp/admin.conf
         mode: "0644"
 
-- name: Ensure k8s workers are configured for all clusters
+- name: Ensure k8s workers are configured as k8s client for all clusters
   hosts: k8s01workers k8s02workers k8s03workers
   become: true
   tasks:
