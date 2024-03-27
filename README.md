@@ -77,6 +77,13 @@ ansible group_vars for groups *k8s01*, *k8s02*, *k8s03* with this content:
 Other variables:
     *domain*	# the domain of the used hosts, here *mydomain*
 
+What if you only want one cluster to be deployed
+------------------------------------------------
+
+The playbooks handle 3 clusters, but if you leave/comment out all entries for k8s02 en k8s03 in the inventory
+the playbooks cannot match the hosts so effectively skip configuring the k8s02 and k8s03 clusters.
+So then only k8s01 will be deployed.
+
 Testing
 -------
 
