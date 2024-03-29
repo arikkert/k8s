@@ -1,31 +1,34 @@
+# https://helm.sh/docs/intro/install/
 ---
 - name: Ensure helm is installed
   hosts: k8s01control k8s02control k8s03control
   become: true
-
   tasks:
-    - name: Fetch + unarchive helm
-      ansible.builtin.unarchive:
-        # N.B. in https://learn.acloud.guru/course/certified-kubernetes-application-developer/
-        #      wordt een repo installed mbv https://baltocdn.com/helm/signing.asc
-        #      Hier wordt hardcoded een een linux executable installed met bepaalde versie
-        src: https://get.helm.sh/helm-v3.14.2-linux-amd64.tar.gz
-        dest: /var/tmp/
-        remote_src: true
 
-    - name: Install helm
-      ansible.builtin.copy:
-        src: /var/tmp/linux-amd64/helm
-        dest: /usr/local/bin/
-        mode: "0755"
-        remote_src: true
+    - name: Ensure apt helm repo key is installed
+      ansible.builtin.get_url:
+        url: https://baltocdn.com/helm/signing.asc
+        dest: /etc/apt/trusted.gpg.d/helm.asc
+        mode: "0644"
 
-    - name: Test helm
+    - name: Ensure helm repo is installed
+      ansible.builtin.apt_repository:
+        repo: "deb https://baltocdn.com/helm/stable/debian/ all main"
+        filename: helm
+        state: present
+        update_cache: true
+
+    - name: Ensure helm is installed
+      ansible.builtin.package:
+        name: helm
+
+    - name: Ensure helm version is determined
       ansible.builtin.command: helm version
       register: result
       changed_when: false
 
-    - name: Debug
+    - name: Ensure helm version is shown
       ansible.builtin.debug:
         var: result.stdout
+      tags: dit
 ...
