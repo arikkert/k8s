@@ -1,0 +1,25 @@
+# https://github.com/kubernetes-sigs/metrics-server/issues/1282
+# https://raw.githubusercontent.com/ACloudGuru-Resources/content-cka-resources/master/metrics-server-components.yaml (al gepatcht door acloudguru
+---
+- name: Ensure metric server is installed
+  hosts: k8s01control k8s02control k8s03control
+  become: false
+  tasks:
+
+    - name: Ensure original latest metrics server release manifest is downloaded
+      ansible.builtin.get_url:
+        url: https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+        dest: /var/tmp/components.yaml
+        mode: "0644"
+
+    - name: Ensure manifest is patched (non idempotent)
+      ansible.builtin.lineinfile:
+        path: /var/tmp/components.yaml
+        insertafter: "        - --metric-resolution=15s"
+        line: "        - --kubelet-insecure-tls"
+
+    - name: Ensure components manifest is applied (non idempontent)
+      become: true
+      become_user: "{{ k8s_user }}"
+      ansible.builtin.command: kubectl apply -f /var/tmp/components.yaml
+...

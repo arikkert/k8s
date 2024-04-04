@@ -3,9 +3,9 @@ ANSIBLELINT=@if which ansible-lint > /dev/null; then ansible-lint -q $@.yml; fi
 OPTIONS=--diff #--check
 PLAYBOOK=ansible-playbook $(OPTIONS) $@.yml
 
-all: check_vms main k8scontrol kube_client k8sjoin helm dashboard octant storage
+all: check_vms main k8scontrol kube_client k8sjoin helm metrics dashboard octant storage
 
-check_vms main k8scontrol kube_client k8sjoin helm dashboard octant storage k8sunjoin:
+check_vms main k8scontrol kube_client k8sjoin helm metrics dashboard octant storage k8sunjoin:
 	$(YAMLLINT)
 	$(ANSIBLELINT)
 	$(PLAYBOOK)

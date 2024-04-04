@@ -15,7 +15,7 @@
         name: "{{ k8s_user }}"
         create_home: true
         shell: /usr/bin/bash
-    - name: Ensure user kube has elevated privileges
+    - name: Ensure user kube has elevated privileges TODO is dat nodig ..
       ansible.builtin.copy:
         src: "{{ item }}"
         dest: /etc/sudoers.d/
@@ -24,12 +24,42 @@
       loop:
         - "{{ k8s_user }}"
 
+    - name: Ensure original shell startup scripts are saved
+      become: true
+      become_user: "{{ k8s_user }}"
+      ansible.builtin.command: "cp -p {{ item }} {{ item }}.bak"
+      args:
+        creates: "{{ item }}.bak"
+      loop:
+        - /home/{{ k8s_user }}/.bashrc
+        - /home/{{ k8s_user }}/.profile
+    - name: Ensure alias k for kubectl is set for user {{ k8s_user }}
+      become: true
+      become_user: "{{ k8s_user }}"
+      ansible.builtin.lineinfile:
+        path: "{{ item }}"
+        line: "alias k='kubectl'"
+        backup: false
+      loop:
+        - /home/{{ k8s_user }}/.bashrc
+        - /home/{{ k8s_user }}/.profile
+
+    - name: Ensure alias to quickly login to k8s_user is present
+      become: false
+      ansible.builtin.lineinfile:
+        path: "{{ item }}"
+        line: "alias k='sudo su - {{ k8s_user }}'"
+        backup: true
+      loop:
+        - .bashrc
+        - .profile
+
     - name: Ensure pre-req for become_user is installed
       ansible.builtin.package:
         name: acl
       check_mode: false
 
-    - name: Ensure original /home/ansible/.bashrc is saved
+    - name: Ensure original shell startup scripts are saved
       become: false
       ansible.builtin.command: "cp -p {{ item }} {{ item }}.bak"
       args:
@@ -42,7 +72,7 @@
       ansible.builtin.lineinfile:
         path: "{{ item }}"
         line: "alias k='sudo su - {{ k8s_user }}'"
-        backup: true
+        backup: false
       loop:
         - .bashrc
         - .profile

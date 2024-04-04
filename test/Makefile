@@ -23,11 +23,11 @@ k8s01control k8s02control k8s03control:
 		echo "OK: All pods in all namespaces are in state Running"; \
 	fi
 	curl --insecure https://$@:6443/healthz; echo
-	curl --insecure https://$@:6443/healthz?verbose
+	#curl --insecure https://$@:6443/healthz?verbose
 	curl --insecure https://$@:6443/livez; echo
-	curl --insecure https://$@:6443/livez?verbose
+	#curl --insecure https://$@:6443/livez?verbose
 	curl --insecure https://$@:6443/readyz; echo
-	curl --insecure https://$@:6443/readyz?verbose
+	#curl --insecure https://$@:6443/readyz?verbose
 	@echo
 
 
