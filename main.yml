@@ -24,7 +24,12 @@
       loop:
         - "{{ k8s_user }}"
 
-    - name: Ensure original shell startup scripts are saved
+    - name: Ensure pre-req for become_user is installed
+      ansible.builtin.package:
+        name: acl
+      check_mode: false
+
+    - name: Ensure original shell startup scripts for k8s_user are saved
       become: true
       become_user: "{{ k8s_user }}"
       ansible.builtin.command: "cp -p {{ item }} {{ item }}.bak"
@@ -38,28 +43,29 @@
       become_user: "{{ k8s_user }}"
       ansible.builtin.lineinfile:
         path: "{{ item }}"
-        line: "alias k='kubectl'"
+        line: "alias k='kubectl' # Line managed by Ansible"
+        regexp: "alias k='kubectl'"
         backup: false
       loop:
         - /home/{{ k8s_user }}/.bashrc
         - /home/{{ k8s_user }}/.profile
 
-    - name: Ensure alias to quickly login to k8s_user is present
-      become: false
-      ansible.builtin.lineinfile:
-        path: "{{ item }}"
-        line: "alias k='sudo su - {{ k8s_user }}'"
-        backup: true
-      loop:
-        - .bashrc
-        - .profile
-
-    - name: Ensure pre-req for become_user is installed
+    - name: Ensure bash-completion package is installed
       ansible.builtin.package:
-        name: acl
-      check_mode: false
+        name: bash-completion
 
-    - name: Ensure original shell startup scripts are saved
+    - name: Ensure kubectl shell completion is active
+      become: true
+      become_user: "{{ k8s_user }}"
+      ansible.builtin.lineinfile:
+        path: /home/{{ k8s_user }}/.bashrc
+        line: "{{ item }} # Line managed by Ansible"
+        backup: false
+      loop:
+        - source <(kubectl completion bash)
+        - complete -o default -F __start_kubectl k
+
+    - name: Ensure original shell startup scripts for ansible user are saved
       become: false
       ansible.builtin.command: "cp -p {{ item }} {{ item }}.bak"
       args:
@@ -71,7 +77,8 @@
       become: false
       ansible.builtin.lineinfile:
         path: "{{ item }}"
-        line: "alias k='sudo su - {{ k8s_user }}'"
+        line: "alias k='sudo su - {{ k8s_user }}' # Line managed by Ansible"
+        regexp: "alias k='sudo su - {{ k8s_user }}'"
         backup: false
       loop:
         - .bashrc
