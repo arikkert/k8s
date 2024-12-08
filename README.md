@@ -1,7 +1,8 @@
 playbook documentation
 ======================
 
-Playbooks to deploy 3 k8s clusters on *Ubuntu 22.04 LTS* hosts
+Playbooks to deploy 3 k8s clusters on *Ubuntu 24.04 LTS* hosts
+(tested on Vagrant box https://portal.cloud.hashicorp.com/vagrant/discover/crystax/ubuntu2404/versions/1.0.0)
 
 It will:
 - check if the hosts fullfill the prereq
