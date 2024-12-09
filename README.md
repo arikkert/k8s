@@ -11,7 +11,7 @@ It will:
 - install helm
 - prepare scripts for k8s dashboard
 - configure octant
-- prepare workers to be NFS client
+- prepare workers to be NFS client for k8s NFS in-tree driver
 
 Info
 ----
@@ -25,7 +25,7 @@ Requirements
 ------------
 
 Deploy host has **make**, **ansible** and **ansible-galaxy** installed.
-Target hosts have *Ubuntu 22.04 LTS* installed.
+Target hosts have *Ubuntu 24.04 LTS* installed.
 Requires root access to target hosts.
 
 Variables
@@ -71,7 +71,7 @@ The playbooks only refer to the group names and never tot the individual hosts (
 ansible group_vars for groups *k8s01*, *k8s02*, *k8s03* with this content:
 
     _ansible_distribution: 'Ubuntu'
-    _ansible_distribution_major_version: 22
+    _ansible_distribution_major_version: 24
     k8s_user: kube
     k8s_group: kube
 

@@ -6,8 +6,9 @@
   tasks:
 
     - name: Ensure pre-req for become_user is installed
-      ansible.builtin.package:
+      ansible.builtin.apt:
         name: acl
+        update_cache:
       check_mode: false
 
     - name: Ensure k8s control node is configured as client
@@ -69,8 +70,9 @@
   tasks:
 
     - name: Ensure pre-req for become_user is installed
-      ansible.builtin.package:
+      ansible.builtin.apt:
         name: acl
+        update_cache: true
       check_mode: false
 
     - name: Ensure k8s workers are configured as client

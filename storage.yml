@@ -6,7 +6,8 @@
   tasks:
 
     - name: Ensure package to enable pods on workers to be NFS client is installed
-      ansible.builtin.package:
+      ansible.builtin.apt:
         name: nfs-common
+        update_cache: true
 
 ...

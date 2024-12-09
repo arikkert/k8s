@@ -25,8 +25,9 @@
         - "{{ k8s_user }}"
 
     - name: Ensure pre-req for become_user is installed
-      ansible.builtin.package:
+      ansible.builtin.apt:
         name: acl
+        update_cache: true
       check_mode: false
 
     - name: Ensure original shell startup scripts for k8s_user are saved
@@ -51,8 +52,9 @@
         - /home/{{ k8s_user }}/.profile
 
     - name: Ensure bash-completion package is installed
-      ansible.builtin.package:
+      ansible.builtin.apt:
         name: bash-completion
+        update_cache: true
 
     - name: Ensure kubectl shell completion is active
       become: true

@@ -19,8 +19,9 @@
         update_cache: true
 
     - name: Ensure helm is installed
-      ansible.builtin.package:
+      ansible.builtin.apt:
         name: helm
+        update_cache: true
 
     - name: Ensure helm version is determined
       ansible.builtin.command: helm version
