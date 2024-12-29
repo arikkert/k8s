@@ -154,15 +154,17 @@
     # kube tools
 
     - name: Ensure keyring is installed
-      ansible.builtin.shell: curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | sudo gpg --dearmor > /etc/apt/keyrings/kubernetes-apt-keyring.gpg # noqa: command-instead-of-module
+      ansible.builtin.shell: curl -fsSL https://pkgs.k8s.io/core:/stable:/{{ k8s_version }}/deb/Release.key | sudo gpg --dearmor > /etc/apt/keyrings/kubernetes-apt-keyring.gpg # noqa: command-instead-of-module
       args:
         creates: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
     - name: Ensure kubernetes repo is installed
-      ansible.builtin.copy:
-        src: kubernetes.list
-        dest: /etc/apt/sources.list.d/
+      ansible.builtin.template:
+        src: "{{ item }}.j2"
+        dest: /etc/apt/sources.list.d/{{ item }}
         mode: "0644"
+      loop:
+        - kubernetes.list
 
     - name: Ensure apt is updated and packages are installed
       ansible.builtin.apt:

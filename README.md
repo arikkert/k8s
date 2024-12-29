@@ -74,6 +74,10 @@ ansible group_vars for groups *k8s01*, *k8s02*, *k8s03* with this content:
     _ansible_distribution_major_version: 24
     k8s_user: kube
     k8s_group: kube
+    k8s_version: v1.32
+
+where *k8s_version* may vary per cluster if the rest of the code is common for all versions
+e.g.. Cluster *k8s01*/*k8s02* have version v1.31 and Cluster k8s03 has version v1.32
 
 Other variables:
     *domain*	# the domain of the used hosts, here *mydomain*
