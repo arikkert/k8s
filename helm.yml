@@ -10,6 +10,7 @@
         url: https://baltocdn.com/helm/signing.asc
         dest: /etc/apt/trusted.gpg.d/helm.asc
         mode: "0644"
+      changed_when: false
 
     - name: Ensure helm repo is installed
       ansible.builtin.apt_repository:
@@ -26,10 +27,10 @@
     - name: Ensure helm version is determined
       ansible.builtin.command: helm version
       register: result
+      check_mode: false
       changed_when: false
 
     - name: Ensure helm version is shown
       ansible.builtin.debug:
         var: result.stdout
-      tags: dit
 ...

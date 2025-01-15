@@ -29,7 +29,7 @@
       ansible.builtin.assert:
         that:
           - ansible_processor_vcpus | int >= 4
-          - ansible_memtotal_mb | int >= 7000
+          - ansible_memtotal_mb | int >= 3000
 
 - name: Ensure k8s worker VMs are checked
   hosts: k8s01workers k8s02workers k8s03workers

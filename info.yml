@@ -1,0 +1,16 @@
+---
+- name: Show specification of all the clusters
+  hosts: k8s01control k8s02control k8s03control
+  become: true
+
+  tasks:
+
+    - name: Show group_vars of all the clusters
+      ansible.builtin.debug:
+        msg:
+          - "ansible_distribution: {{ ansible_distribution }}"
+          - "ansible_distribution_major_version: {{ ansible_distribution_major_version }}"
+          - "k8s_user: {{ k8s_user }}"
+          - "k8s_group: {{ k8s_group }}"
+          - "k8s_version: {{ k8s_version }}"
+...

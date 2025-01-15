@@ -3,12 +3,9 @@ ANSIBLELINT=@if which ansible-lint > /dev/null; then ansible-lint -q $@.yml; fi
 OPTIONS=--diff #--check
 PLAYBOOK=ansible-playbook $(OPTIONS) $@.yml
 
-all: check_vms main k8scontrol kube_client k8sjoin helm metrics dashboard octant storage
+all: info check_vms main k8scontrol kube_client k8sjoin helm metrics octant storage
 
-check_vms main k8scontrol kube_client k8sjoin helm metrics dashboard octant storage k8sunjoin:
+info check_vms main k8scontrol kube_client k8sjoin helm metrics octant storage k8sunjoin:
 	$(YAMLLINT)
 	$(ANSIBLELINT)
 	$(PLAYBOOK)
-
-token:
-	ssh k8scontrol echo kubectl -n kubernetes-dashboard create token admin-user \| sudo su - kube; echo
