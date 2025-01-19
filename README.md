@@ -1,8 +1,8 @@
 playbook documentation
 ======================
 
-Playbooks to deploy 3 k8s clusters on *Ubuntu 24.04 LTS* hosts
-(tested on Vagrant box https://portal.cloud.hashicorp.com/vagrant/discover/crystax/ubuntu2404/versions/1.0.0)
+Playbooks to deploy 3 Vanilla k8s clusters on *Ubuntu 24.04 LTS* hosts
+tested on [this Vagrant box](https://portal.cloud.hashicorp.com/vagrant/discover/crystax/ubuntu2404/versions/1.0.0)
 
 It will:
 - check if the hosts fullfill the prereq
@@ -10,7 +10,8 @@ It will:
 - install a user *kube* to administer the cluster
 - install helm
 - prepare scripts for k8s dashboard
-- configure octant
+- install and configure octant
+- install k9s
 - prepare workers to be NFS client for k8s NFS in-tree driver
 
 Info
@@ -77,7 +78,7 @@ ansible group_vars for groups *k8s01*, *k8s02*, *k8s03* with this content:
     k8s_version: v1.32
 
 where *k8s_version* may vary per cluster if the rest of the code is common for all versions
-e.g.. Cluster *k8s01*/*k8s02* have version v1.31 and Cluster k8s03 has version v1.32
+e.g.. Cluster *k8s01*/*k8s02* have version [v.31](https://kubernetes.io/releases/) and Cluster *k8s03* has version [v1.32](https://kubernetes.io/releases/)
 
 Other variables:
     *domain*	# the domain of the used hosts, here *mydomain*

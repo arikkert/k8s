@@ -1,0 +1,36 @@
+---
+- name: Ensure k9s (a terminal UI to interact with your Kubernetes clusters) is installed
+  hosts: k8s01control k8s02control k8s03control
+  become: true
+  vars:
+    package: k9s
+    os: linux
+    architecture: amd64
+    type: deb
+
+  tasks:
+
+    - name: Esure required packages are installed
+      ansible.builtin.package:
+        name:
+          - curl
+          - jq
+
+    - name: Ensure latest k9s version is registered
+      ansible.builtin.shell:
+        curl --silent https://api.github.com/repos/derailed/k9s/releases/latest | \
+        jq -r '.assets[].browser_download_url' | \
+        grep {{ package }}_{{ os }}_{{ architecture }}.{{ type }} # noqa command-instead-of-module
+      register: result
+      check_mode: false
+      changed_when: false
+
+    - name: Ensure selected latest k9s deb package is shown
+      ansible.builtin.debug:
+        var: result.stdout
+
+    - name: Ensure selected k9s deb package is installed
+      ansible.builtin.apt:
+        deb: "{{ result.stdout }}"
+
+...
