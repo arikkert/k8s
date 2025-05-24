@@ -16,7 +16,7 @@
           - curl
           - jq
 
-    - name: Ensure latest k9s version is registered
+    - name: Ensure latest k9s version from https://github.com/derailed/k9s is registered
       ansible.builtin.shell:
         curl --silent https://api.github.com/repos/derailed/k9s/releases/latest | \
         jq -r '.assets[].browser_download_url' | \

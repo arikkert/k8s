@@ -8,7 +8,6 @@
       ansible.builtin.apt:
         name:
           - git
-          - vim
 
     - name: Add unprivileged user
       ansible.builtin.user:
