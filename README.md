@@ -8,7 +8,6 @@ It will:
 - check if the hosts fullfill the prereq
 - configure the k8s controllers and join the k8s workers to the clusters
 - install a user *kube* to administer the cluster
-- install helm
 - prepare scripts for k8s dashboard
 - install and configure octant
 - install k9s

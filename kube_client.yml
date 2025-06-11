@@ -1,5 +1,5 @@
 ---
-- name: Ensure controller is configured as k8s client
+- name: Ensure controllers are configured as k8s client for all clusters
   hosts: k8s01control k8s02control k8s03control
   become: true
 

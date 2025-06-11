@@ -1,6 +1,6 @@
 ---
 - name: Ensure k9s (a terminal UI to interact with your Kubernetes clusters) is installed
-  hosts: k8s01control k8s02control k8s03control
+  hosts: k8s01control k8s02control k8s03control k8sclients
   become: true
   vars:
     package: k9s
