@@ -21,7 +21,7 @@
         mode: "0644"
       when: "'join' in result.stdout"
 
-    - name: Ensure controle node is configured as client
+    - name: Ensure control node is configured as client
       become_user: "{{ k8s_user }}"
       ansible.builtin.script: k8s_user/kube_client.sh
       args:
