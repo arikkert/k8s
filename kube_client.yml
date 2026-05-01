@@ -12,12 +12,14 @@
       check_mode: false
 
     - name: Ensure k8s control node is configured as client
+      become: true
       become_user: "{{ k8s_user }}"
       ansible.builtin.script: k8s_user/kube_client.sh
       args:
         creates: /home/{{ k8s_user }}/.kube/config
 
     - name: Test if client is configured
+      become: true
       become_user: "{{ k8s_user }}"
       ansible.builtin.command: kubectl get nodes
       register: result
@@ -76,12 +78,14 @@
       check_mode: false
 
     - name: Ensure k8s workers are configured as client
+      become: true
       become_user: "{{ k8s_user }}"
       ansible.builtin.script: k8s_user/kube_client.sh
       args:
         creates: /home/{{ k8s_user }}/.kube/config
 
     - name: Test if client is configured
+      become: true
       become_user: "{{ k8s_user }}"
       ansible.builtin.command: kubectl get nodes
       register: result

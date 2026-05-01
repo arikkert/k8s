@@ -22,14 +22,16 @@
       when: "'join' in result.stdout"
 
     - name: Ensure control node is configured as client
+      become: true
       become_user: "{{ k8s_user }}"
       ansible.builtin.script: k8s_user/kube_client.sh
       args:
         creates: /home/kube/.kube
 
     - name: Check if succeeded
-      ansible.builtin.command: kubectl get all
+      become: true
       become_user: "{{ k8s_user }}"
+      ansible.builtin.command: kubectl get all
       register: result
       changed_when: false
 
@@ -38,6 +40,7 @@
         var: result.stdout
 
     - name: Check if network is already configured
+      become: true
       become_user: "{{ k8s_user }}"
       ansible.builtin.shell: kubectl get pods -n kube-system | grep -w calico
       register: result
@@ -46,8 +49,9 @@
       check_mode: false
 
     - name: Configure Network
-      ansible.builtin.command: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+      become: true
       become_user: "{{ k8s_user }}"
+      ansible.builtin.command: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
       when: result.rc != 0
 
 ...

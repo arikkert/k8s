@@ -23,9 +23,10 @@
 
     - name: Debug
       ansible.builtin.debug:
-        var: hostvars['k8s01control.{{ domain }}']['result'].stdout
+        msg: "{{ hostvars['k8s01control.' + domain]['result'].stdout }}"
 
     - name: Ensure cluster nodes are known, then they are joined
+      become: true
       become_user: "{{ k8s_user }}"
       ansible.builtin.command: kubectl get nodes
       register: result
@@ -48,9 +49,10 @@
 
     - name: Debug
       ansible.builtin.debug:
-        var: hostvars['k8s02control.{{ domain }}']['result'].stdout
+        msg: "{{ hostvars['k8s02control.' + domain]['result'].stdout }}"
 
     - name: Ensure cluster nodes are known, then they are joined
+      become: true
       become_user: "{{ k8s_user }}"
       ansible.builtin.command: kubectl get nodes
       register: result
@@ -72,9 +74,10 @@
 
     - name: Debug
       ansible.builtin.debug:
-        var: hostvars['k8s03control.{{ domain }}']['result'].stdout
+        msg: "{{ hostvars['k8s03control.' + domain]['result'].stdout }}"
 
     - name: Ensure cluster nodes are known, then they are joined
+      become: true
       become_user: "{{ k8s_user }}"
       ansible.builtin.command: kubectl get nodes
       register: result
