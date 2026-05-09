@@ -29,7 +29,7 @@ k8s01control k8s02control k8s03control:
 	sleep 2
 	@echo "Nodes"
 	@ssh $@ echo kubectl get nodes \| sudo su - kube
-	@echo -n "health: "
+	@echo -n "healthz: "
 	@ssh $@ echo kubectl get --raw='/healthz$(VERBOSE)' \| sudo su - kube; echo
 	@echo -n "livez: "
 	@ssh $@ echo kubectl get --raw='/livez$(VERBOSE)' \| sudo su - kube; echo
@@ -40,11 +40,11 @@ k8s01control k8s02control k8s03control:
 		ssh $@ echo kubectl get pods --all-namespaces -o wide \| sudo su - kube; \
 	fi
 	@echo
-	@if ssh $@ echo kubectl get pods --all-namespaces -o wide \| sudo su - kube | grep -v ^NAMESPACE | grep -vw Running; \
+	@if ssh $@ echo kubectl get pods --all-namespaces -o wide \| sudo su - kube | grep -v ^NAMESPACE | grep -vwE Running\|Completed; \
 	then \
-		echo "NOK Some pods in all namespaces are not in state Running"; \
+		echo "NOK Some pods in all namespaces are not in state Running/Completed"; \
 	else \
-		echo "OK: All pods in all namespaces are in state Running"; \
+		echo "OK: All pods in all namespaces are in state Running/Completed"; \
 	fi
 	@echo -n "healtz:"
 	@curl --insecure https://$@:6443/healthz$(VERBOSE); echo
