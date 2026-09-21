@@ -1,0 +1,40 @@
+---
+# op minikube crt gebruiken ipv crictl, nog uitzoeken
+- name: Ensure crictl can be used, which is handy for debugging
+  hosts: k8s03
+  become: true
+
+  tasks:
+
+    - name: Esure required packages are installed
+      ansible.builtin.package:
+        name:
+          - cri-tools
+
+    - name: Esure crictl is configured
+      ansible.builtin.copy:
+        src: crictl.yaml
+        dest: /etc/
+        mode: "0644"
+
+    - name: Ensure cri-tools version is registered
+      ansible.builtin.command: apt info cri-tools
+      register: result
+      check_mode: false
+      changed_when: false
+
+    - name: Ensure cri-tools version is shown
+      ansible.builtin.debug:
+        var: result.stdout_lines
+
+    - name: Ensure crictl version is registered
+      ansible.builtin.command: crictl version
+      register: result
+      check_mode: false
+      changed_when: false
+
+    - name: Ensure crictl version is shown
+      ansible.builtin.debug:
+        var: result.stdout_lines
+
+...

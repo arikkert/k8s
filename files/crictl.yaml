@@ -1,0 +1,12 @@
+# File magaged by Ansible
+#
+# komt van cka git repo van sander
+# na install kun je commando's als
+#   sudo crictl ps
+#   sudo crictl images
+# geven
+#
+runtime-endpoint: unix:///var/run/containerd/containerd.sock
+image-endpoint: unix:///var/run/containerd/containerd.sock
+timeout: 2
+#debug: true

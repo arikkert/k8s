@@ -1,0 +1,4 @@
+Op nagios host
+/usr/local/libexec/nagios/check_http -H k8s01control -p 6443 -S -u "/healthz?verbose" -s "healthz check passed" -v
+/usr/local/libexec/nagios/check_http -H k8s01control -p 6443 -S -u "/livez?verbose"   -s "livez   check passed" -v
+/usr/local/libexec/nagios/check_http -H k8s01control -p 6443 -S -u "/readyz?verbose"  -s "readyz  check passed" -v

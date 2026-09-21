@@ -117,11 +117,19 @@
       args:
         creates: /etc/containerd/config.toml
 
-    - name: Patch default config containerd
+    - name: Patch default config containerd - disabled_plugins
       ansible.builtin.lineinfile:
         dest: /etc/containerd/config.toml
         regexp: "^disabled_plugins = \\[\\]"
         line: "# disabled_plugins = []"
+        backup: true
+
+    - name: Patch default config containerd - SystemdCgroup
+      ansible.builtin.lineinfile:
+        path: /etc/containerd/config.toml
+        regexp: '^(\s*)SystemdCgroup\s*=\s*false'
+        line: '\1SystemdCgroup = true'
+        backrefs: true
         backup: true
 
     - name: Install pkgs
